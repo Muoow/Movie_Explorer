@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {type MovieCreditInfo, type MovieInfo, type MovieReviewInfo} from "@/api/responsePanel.ts";
 import { ref, onMounted, computed, watch } from "vue";
-import { fetchMovieCredits, fetchMovieReviews } from "@/api/getMovieInfo.ts";
+import { fetchMovieCredits, fetchMovieReviews, fetchSimilarMovies } from "@/api/getMovieInfo.ts";
 
 // 子组件需要的参数
 const props = defineProps<{ movie: MovieInfo }>()
@@ -10,6 +10,8 @@ const props = defineProps<{ movie: MovieInfo }>()
 const credits = ref<{ cast: MovieCreditInfo[] }>({ cast: [] })
 // 评论数据
 const reviews = ref<{ results: MovieReviewInfo[] }>({ results: [] })
+// 相似的电影
+const similar = ref<{ results: MovieInfo[] }>({ results: [] });
 
 // 是否在加载
 const loading = ref<boolean>(false);
@@ -18,6 +20,7 @@ async function load(movieId: number) {
   loading.value = true
   credits.value = await fetchMovieCredits(movieId)
   reviews.value = await fetchMovieReviews(movieId)
+  similar.value = await fetchSimilarMovies(movieId)
   loading.value = false
 }
 
@@ -31,6 +34,10 @@ const backgroundStyle = computed(() => ({
 function getPosterUrl(path: string) {
   return `https://image.tmdb.org/t/p/original${path}`;
 }
+
+onMounted(async () => {
+  await load(props.movie.id)
+})
 
 watch(
   () => props.movie.id,
@@ -123,6 +130,38 @@ watch(
           </div>
         </div>
       </div>
+
+      <div class="similar-section">
+        <h3>相似电影推荐</h3>
+        <div v-if="similar.results.length === 0" class="no-similar">暂无推荐</div>
+        <div v-else-if="loading" class="no-similar">正在加载</div>
+        <div v-else class="similar-scroll">
+          <div class="similar-row">
+            <el-card
+                v-for="movie in similar.results"
+                :key="movie.id"
+                class="similar-card"
+            >
+              <template #header>
+                <img
+                    v-if="movie.poster_path"
+                    :src="getPosterUrl(movie.poster_path)"
+                    alt="poster"
+                    class="similar-poster"
+                />
+              </template>
+              <div class="similar-info">
+                <div style="font-size: 14px; font-weight: bold">
+                  {{ movie.title }}
+                </div>
+                <div style="font-size: 12px; ">
+                  {{ movie.release_date }}
+                </div>
+              </div>
+            </el-card>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -191,19 +230,19 @@ watch(
   line-height: 1.6;
 }
 
-.credits-scroll {
+.credits-scroll, .similar-scroll {
   overflow-x: auto;
   white-space: nowrap;
   padding-bottom: 8px;
   margin-top: 10px;
 }
 
-.credits-row {
+.credits-row, .similar-row {
   display: inline-flex;
   gap: 16px;
 }
 
-.credits-section, .reviews-section {
+.credits-section, .reviews-section, .similar-section {
   margin-top: 40px;
   width: 100%;
   max-width: 900px;
@@ -212,12 +251,12 @@ watch(
   padding: 20px 30px;
 }
 
-.credit-card ::v-deep(.el-card__header) {
+.credit-card::v-deep(.el-card__header), .similar-card::v-deep(.el-card__header) {
   padding: 0;
   border: none;
 }
 
-.credit-card ::v-deep(.el-card__body) {
+.credit-card::v-deep(.el-card__body), .similar-card ::v-deep(.el-card__body) {
   padding: 0;
   border: none;
 }
@@ -229,15 +268,28 @@ watch(
   border-radius: 8px;
 }
 
+.similar-card {
+  width: 160px;
+  height: 270px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 .credit-avatar {
   width: 100%;
   height: 180px;
 }
 
-.credit-info {
+.credit-info, .similar-info {
   display: flex;
   flex-direction: column;
   padding: 0 4px;
+}
+
+.similar-poster {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
 }
 
 .reviews-section h3 {
@@ -245,7 +297,7 @@ watch(
   margin-bottom: 15px;
 }
 
-.no-credits, .no-reviews {
+.no-credits, .no-reviews, .no-similar {
   color: #bbb;
   font-style: italic;
 }

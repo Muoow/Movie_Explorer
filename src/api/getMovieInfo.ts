@@ -153,3 +153,26 @@ export async function fetchMovieCredits(id: number): Promise<any> {
         throw new Error()
     }
 }
+
+export async function fetchSimilarMovies(id: number) {
+    try {
+        const res = await axios.get(
+            `https://api.themoviedb.org/3/movie/${id}/similar`,
+            {
+                params: {
+                    language: 'zh-CN',
+                },
+                headers: {
+                    accept: 'application/json',
+                    Authorization: `Bearer ${import.meta.env.VITE_APP_MOVIE_KEY}`,
+                }
+            }
+        )
+
+        return res.data
+    }
+    catch (error) {
+        console.error("获取类似电影数据失败：", error)
+        throw new Error()
+    }
+}

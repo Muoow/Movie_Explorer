@@ -109,7 +109,7 @@ const chartData = computed(() => {
         <div class="weather-icon">{{ day.night.icon }}</div>
         <div class="weather-text">{{ day.night.weather }}  {{ day.night.temp }}℃</div>
         <div class="wind-info">
-          {{ day.night.wind }}风 | {{ day.night.power }}级
+          {{ day.night.wind }} 风 | {{ day.night.power }} 级
         </div>
       </div>
     </div>

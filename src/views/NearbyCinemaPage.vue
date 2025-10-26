@@ -7,7 +7,7 @@ import { fetchWeatherInfo } from "@/api/getWeatherInfo.ts";
 import { fetchCinemaInfo } from "@/api/getCinemaInfo.ts";
 import { type WeatherForecastInfo, type CinemaPoiInfo } from "@/api/responsePanel";
 
-const MY_POS = [121.214160,31.286012]
+const MY_POS = ref<[number, number]>([121.214160, 31.286012]);
 
 // 动态地图
 let AMap: any = null
@@ -34,6 +34,7 @@ onMounted(async () => {
           'AMap.ToolBar',
           'AMap.Scale',
           'AMap.Driving',
+          'AMap.Geolocation'
         ],
       })
       .then(mapItem => {
@@ -44,6 +45,30 @@ onMounted(async () => {
         })
         map.addControl(new AMap.ToolBar())
         map.addControl(new AMap.Scale())
+
+        const geolocation = new AMap.Geolocation({
+          enableHighAccuracy: true, // 开启高精度定位
+          timeout: 10000,           // 超时时间
+          position: "RB",           // 定位按钮位置（右下）
+          showCircle: true,         // 显示精度圆
+          showMarker: true,         // 显示定位点
+          panToLocation: true,      // 定位成功后移动地图
+        })
+
+        map.addControl(geolocation)
+        // 获取用户位置
+        geolocation.getCurrentPosition((status: string, result: any) => {
+          if (status === "complete") {
+            const lng = result.position.lng
+            const lat = result.position.lat
+            MY_POS.value = [lng, lat]
+
+            console.log("用户当前位置：", MY_POS.value)
+            map.setCenter(MY_POS.value)
+          } else {
+            console.warn("定位失败：", result)
+          }
+        })
       })
       .catch(e => {
         console.log(e)
@@ -54,7 +79,7 @@ onMounted(async () => {
   weatherData.value = result
 
   // 获取影院信息
-  const response = await fetchCinemaInfo()
+  const response = await fetchCinemaInfo(MY_POS.value[0].toString(), MY_POS.value[1].toString())
   cinemaData.value = response
 
   cinemaData.value?.pois.forEach((cinema) => {
@@ -77,6 +102,7 @@ onMounted(async () => {
         border: "1px solid #ccc",
         fontSize: "16px",
         boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+        color: "#000000",
         whiteSpace: "nowrap",
       },
       offset: new AMap.Pixel(-80, -40),
@@ -108,7 +134,7 @@ function fetchDirectionsToCinema() {
       showTraffic: false,
     });
 
-    const origin = new AMap.LngLat(MY_POS[0], MY_POS[1]);
+    const origin = new AMap.LngLat(MY_POS.value[0], MY_POS.value[1]);
     const destination = new AMap.LngLat(currCinema.value[0], currCinema.value[1]);
 
     currentDriving.search(origin, destination, (status: string, result: any) => {

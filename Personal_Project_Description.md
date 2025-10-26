@@ -1,6 +1,6 @@
 # 电影检索&附近影院查看平台
 
-
+[项目仓库链接](https://github.com/Muoow/Movie_Explorer)
 
 ## 一、项目背景
 
@@ -80,9 +80,9 @@ src
 
 * 3. **附近影院与天气联动**
 
-    * 影院信息获取：调用高德地图 Search POI API，传入用户当前定位（或默认 “上海嘉定区”），筛选 “影院” 类型的 POI 数据，获取影院名称、详细地址、商家电话、评分、营业时间等信息，在地图上标记位置并列表展示。
+    * 影院信息获取：调用高德地图 Search POI API，传入用户当前定位，筛选 “影院” 类型的 POI 数据，获取影院名称、详细地址、商家电话、评分、营业时间等信息，在地图上标记位置并列表展示。
 
-    * 天气信息辅助：调用高德地图 Weather Forecast API，获取当前区域（如上海嘉定区）的实时温度、风向风力、未来多日天气，为用户判断 “是否适合外出观影” 提供参考，且页面实时显示天气更新时间（如 2025-10-21 17:31:42）。
+    * 天气信息辅助：调用高德地图 Weather Forecast API，获取当前区域的实时温度、风向风力、未来多日天气，为用户判断 “是否适合外出观影” 提供参考，且页面实时显示天气更新时间。
 
 #### (3) API 调用与处理
 
@@ -90,7 +90,7 @@ src
 
 * **API 密钥配置：** 在 env.d.ts 中定义环境变量，存储 TMDB API Key 与高德地图 Key，避免密钥硬编码；同时在 .gitignore 中排除环境配置文件，保障密钥安全。
 
-* **错误处理机制：** 针对 API 调用失败场景（如文档 7、8 中 “INVALID_USER_KEY” 错误），在 Axios 响应拦截器中捕获错误码，页面显示 “数据加载失败，请重试” 提示；若 TMDB API 返回无结果，展示 “未找到匹配电影” 的空状态页面。
+* **错误处理机制：** 针对 API 调用失败场景，在 Axios 响应拦截器中捕获错误码，页面显示 “数据加载失败，请重试” 提示；若 TMDB API 返回无结果，展示 “未找到匹配电影” 的空状态页面。
 
 * **数据格式转换：** 将 API 返回的原始数据（如时间戳、英文类型名）转换为用户友好格式，例如将 TMDB 的 “release_date” 转换为 “2025-07-24” 格式，将高德 API 的 “business_hours” 拆分为 “今日营业” 与 “完整时间” 展示。
 
@@ -108,8 +108,9 @@ src
 | ---------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | Discover Movie   | https://api.themoviedb.org/3/discover/movie                | Find movies using over 30 filters and sort options.          |
 | Movie List       | https://api.themoviedb.org/3/movie/{movie_type}            | Get different kinds of movies.                               |
+| Movie Genres     | https://api.themoviedb.org/3/genre/movie/list              | Get the list of official genres for movies.                  |
 | Movies Credits   | https://api.themoviedb.org/3/movie/{movie_id}/credits      | Get the credits for a movie.                                 |
 | Movies Reviews   | https://api.themoviedb.org/3/movie/{movie_id}/reviews      | Get the user reviews for a movie.                            |
 | Search Movie     | https://api.themoviedb.org/3/search/movie                  | Search for movies by their titles.                           |
-| Search POI       | https://restapi.amap.com/v5/place/around?parameters        | Search for movies by their titles.                           |
+| Search POI       | https://restapi.amap.com/v5/place/around?parameters        | Get the POIs                                                 |
 | Weather Forecast | https://restapi.amap.com/v3/weather/weatherInfo?parameters | Get the weather forecast.                                    |

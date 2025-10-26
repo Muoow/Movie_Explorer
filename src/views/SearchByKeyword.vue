@@ -156,7 +156,7 @@ onMounted(async () => {
               <span v-if="index < movie.genre_ids.length - 1"> / </span>
               </span>
             </p>
-            <p><strong>评分：</strong>{{ movie.release_date }}</p>
+            <p><strong>评分：</strong>{{ movie.vote_average }}</p>
           </div>
           <div v-if="movie.overview!=''"
               style="width: 60%; max-height: 10em; overflow-y: auto; text-overflow: ellipsis;">

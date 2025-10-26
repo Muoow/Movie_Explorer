@@ -152,7 +152,7 @@ function getPosterUrl(path: string) {
   </div>
 
   <el-drawer v-model="showDetail"
-             v-if="selectedMovie!=undefined"
+             v-if="selectedMovie"
              size="40%"
              :with-header="false"
              resizable
