@@ -8,6 +8,7 @@ import { fetchCinemaInfo } from "@/api/getCinemaInfo.ts";
 import { type WeatherForecastInfo, type CinemaPoiInfo } from "@/api/responsePanel";
 
 const MY_POS = ref<[number, number]>([121.214160, 31.286012]);
+const CUR_CITY = ref<number>(310114);
 
 // 动态地图
 let AMap: any = null
@@ -34,7 +35,8 @@ onMounted(async () => {
           'AMap.ToolBar',
           'AMap.Scale',
           'AMap.Driving',
-          'AMap.Geolocation'
+          'AMap.Geolocation',
+          'AMap.Geocoder'
         ],
       })
       .then(mapItem => {
@@ -49,39 +51,47 @@ onMounted(async () => {
         const geolocation = new AMap.Geolocation({
           enableHighAccuracy: true, // 开启高精度定位
           timeout: 10000,           // 超时时间
-          position: "RB",           // 定位按钮位置（右下）
+          position: "LT",           // 定位按钮位置
           showCircle: true,         // 显示精度圆
           showMarker: true,         // 显示定位点
           panToLocation: true,      // 定位成功后移动地图
         })
 
         map.addControl(geolocation)
-        // 获取用户位置
-        geolocation.getCurrentPosition((status: string, result: any) => {
-          if (status === "complete") {
-            const lng = result.position.lng
-            const lat = result.position.lat
-            MY_POS.value = [lng, lat]
 
-            console.log("用户当前位置：", MY_POS.value)
-            map.setCenter(MY_POS.value)
-          } else {
-            console.warn("定位失败：", result)
-          }
-        })
+        // 获取用户位置
+        // geolocation.getCurrentPosition((status: string, result: any) => {
+        //   if (status === "complete") {
+        //     let position = result.position;
+        //     MY_POS.value = [position.lng, position.lat]
+        //     // 设置地图中心为获得的新位置
+        //     map.setCenter(MY_POS.value)
+        //
+        //     const geocoder = new AMap.Geocoder()
+        //
+        //     geocoder.getAddress([position.lng, position.lat], (status: string, result: any) => {
+        //       if (status === "complete" && result.regeocode) {
+        //         const pos = result.regeocode.addressComponent
+        //         CUR_CITY.value = pos.citycode
+        //       }
+        //     })
+        //     // 根据获取到的位置分析当前的城市编号
+        //   }
+        // })
       })
       .catch(e => {
         console.log(e)
       })
 
   // 获取天气信息
-  const result = await fetchWeatherInfo()
+  const result = await fetchWeatherInfo(CUR_CITY.value.toString())
   weatherData.value = result
 
   // 获取影院信息
   const response = await fetchCinemaInfo(MY_POS.value[0].toString(), MY_POS.value[1].toString())
   cinemaData.value = response
 
+  // 为每一个影院在地图上创建一个标记
   cinemaData.value?.pois.forEach((cinema) => {
     if (!cinema.location) return;
 

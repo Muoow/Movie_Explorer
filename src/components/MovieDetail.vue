@@ -16,6 +16,9 @@ const similar = ref<{ results: MovieInfo[] }>({ results: [] });
 // 是否在加载
 const loading = ref<boolean>(false);
 
+// 翻译后的评论
+const translatedReviews = ref<{ [key: string]: string }>({});
+
 async function load(movieId: number) {
   loading.value = true
   credits.value = await fetchMovieCredits(movieId)
